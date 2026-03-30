@@ -1,0 +1,123 @@
+{
+  "project_context": {
+    "app_type": "Desktop SQL Client / Developer Tool",
+    "theme": "Dark Mode Default, Light Mode Supported",
+    "archetype": "Archetype 4 (Swiss & High-Contrast) with Retro-Futurism/Terminal touches"
+  },
+  "typography": {
+    "font_family": {
+      "headings": "IBM Plex Sans, sans-serif",
+      "body": "IBM Plex Sans, sans-serif",
+      "monospace": "JetBrains Mono, Source Code Pro, monospace"
+    },
+    "rules": {
+      "heading_weight": "font-bold",
+      "letter_spacing": "tracking-tight for headings, tracking-normal for body",
+      "line_height": "leading-tight for headings, leading-relaxed for body"
+    },
+    "scale": {
+      "h1": "text-3xl sm:text-4xl",
+      "h2": "text-2xl sm:text-3xl",
+      "h3": "text-xl",
+      "body": "text-sm sm:text-base",
+      "code": "text-sm",
+      "labels": "text-xs tracking-[0.2em] uppercase"
+    },
+    "anti_patterns": [
+      "Do not use Inter, Roboto, or standard sans for headings."
+    ]
+  },
+  "color_palette": {
+    "dark_mode": {
+      "background": "#0D0D12",
+      "surface": "#16161D",
+      "border": "#2D2D35",
+      "text_primary": "#F8F8F8",
+      "text_secondary": "#A0A0AB",
+      "accent_primary": "#3A75FF",
+      "accent_hover": "#5C8DFF",
+      "accent_ai_debug": "#F5A623",
+      "error": "#FF453A",
+      "success": "#32D74B"
+    },
+    "light_mode": {
+      "background": "#F9F9FB",
+      "surface": "#FFFFFF",
+      "border": "#E5E5EA",
+      "text_primary": "#111115",
+      "text_secondary": "#6E6E77",
+      "accent_primary": "#0040DD",
+      "accent_hover": "#0032A8",
+      "accent_ai_debug": "#E08A00",
+      "error": "#D70015",
+      "success": "#28CD41"
+    },
+    "rules": {
+      "tints": "Never use pure #000000 or #FFFFFF. Use slightly tinted grays for natural depth.",
+      "contrast": "Ensure minimum 4.5:1 ratio for standard text. Highlight AI Debug with the Amber/Yellow accent to make it feel like a distinct feature.",
+      "hover_states": "Always define explicit hover text and background colors."
+    }
+  },
+  "layout_and_spacing": {
+    "strategy": "The Control Room Grid",
+    "spacing_scale": "Tight and dense. Use p-2, p-4, p-6 for panels. gap-2 to gap-4 for toolbars.",
+    "structure": {
+      "app_shell": "h-screen w-full flex overflow-hidden bg-background text-foreground",
+      "sidebar": "w-16 md:w-64 flex-shrink-0 border-r border-border bg-surface flex flex-col",
+      "main_area": "flex-1 flex flex-col min-w-0 h-full",
+      "toolbar": "h-14 border-b border-border flex items-center px-4 justify-between bg-surface",
+      "editor_pane": "flex-1 min-h-[40%] border-b border-border relative",
+      "results_pane": "h-[40%] bg-surface overflow-auto relative"
+    },
+    "rules": {
+      "borders": "Expose the skeleton. Use 1px borders everywhere (border-collapse style) to separate panels. No shadows on layout panels.",
+      "radius": "Keep it sharp. Use rounded-none or max rounded-sm (2-4px) to maintain a highly technical, precise feel.",
+      "card_components": "Avoid Shadcn Card wrappers if they add too much padding or shadow. Prefer raw divs with precise border and padding."
+    }
+  },
+  "surface_strategies": {
+    "primary": "Grid Borders (The Technical Look). Panels are separated by crisp 1px lines without shadows.",
+    "floating_elements": "For dropdowns (e.g., Database Selector) or AI Debug overlays, use Neumorphism (Crisp) with sharp inner contrasts, solid background, 1px border, and a subtle drop-shadow to separate from the grid."
+  },
+  "components_and_interactions": {
+    "buttons": "Flat, sharp edges. Primary actions (Run) use primary color bg. Secondary actions (Refresh) use surface bg with border. AI Debug button should have a subtle glow or the amber accent color.",
+    "editor": "Must use a code editor component (like Monaco or CodeMirror via react-simple-code-editor) with JetBrains Mono font and distinct syntax highlighting.",
+    "data_grid": "For SQL results, use a dense Shadcn Table. No rounded corners on the table cells. sticky header. text-sm.",
+    "tabs": "For Sidebar navigation (History, Files, Databases, Settings). Use sharp, flat tab indicators (e.g., left border highlight).",
+    "forms": "Use Shadcn components (Input, Select) customized to have sharp corners (rounded-none) and 1px borders.",
+    "ai_debug": "When triggered, overlay or side-panel should slide in smoothly. Use a subtle typewriter effect or highlight for the suggested code fixes.",
+    "file_system": "js files, not tsx. Ensure all Shadcn installations use the javascript flag."
+  },
+  "icons": {
+    "library": "@phosphor-icons/react",
+    "installation": "yarn add @phosphor-icons/react",
+    "usage": "Use Phosphor Icons (Regular or Duotone weight). Key icons needed: Play (Run), ArrowsClockwise (Refresh), Database, ClockCounterClockwise (History), Folder (Files), Sparkle/MagicWand (AI Debug), Gear (Settings), Moon/Sun (Theme Toggle)."
+  },
+  "animations": {
+    "hover": "Instant background color shifts. No scaling on technical buttons.",
+    "panels": "If sidebar collapses, use a 0.2s ease transition.",
+    "accessibility": "Respect prefers-reduced-motion."
+  },
+  "testing": {
+    "rules": "All interactive and key informational elements MUST include a data-testid attribute.",
+    "examples": [
+      "data-testid='run-query-button'",
+      "data-testid='refresh-results-button'",
+      "data-testid='ai-debug-button'",
+      "data-testid='sql-editor-input'",
+      "data-testid='results-table'",
+      "data-testid='database-selector'"
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Initialize React with JavaScript (not TypeScript) as requested.",
+    "Install dependencies: Tailwind CSS, shadcn/ui (configured for JS), @phosphor-icons/react.",
+    "Setup Dark/Light mode toggle correctly using next-themes or raw context, defaulting to Dark.",
+    "Build the 'Control Room' app shell layout using CSS Grid or Flexbox with 1px borders separating all panes.",
+    "Implement the Code Editor using a library like react-simple-code-editor or similar that supports syntax highlighting.",
+    "Implement the Results Table for SQL outputs. Ensure it can handle empty states gracefully.",
+    "Implement the Sidebar with mocked views for History, Files, and Settings.",
+    "Add the AI Debug functionality as a mocked feature that shows a suggestion panel when clicked.",
+    "Ensure all interactive elements have data-testid attributes."
+  ]
+}
