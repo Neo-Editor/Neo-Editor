@@ -905,7 +905,9 @@ async def import_data(request: ImportDataRequest):
         db_type = request.database_type.lower()
         
         if db_type == "sqlite":
-            db_path = request.connection_params.get('database', '/tmp/sql_studio_default.db') if request.connection_params else '/tmp/sql_studio_default.db'
+            db_path = DB_PATHS['sqlite']
+            if request.connection_params and request.connection_params.get('database') and request.connection_params['database'] != 'embedded':
+                db_path = request.connection_params['database']
             conn = sqlite3.connect(db_path)
             cursor = conn.cursor()
             
