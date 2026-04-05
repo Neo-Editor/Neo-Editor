@@ -4,13 +4,17 @@
 
 **Professional SQL Client with Zero Setup**
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/Neo-Editor/Neo-Editor/releases)
+[![Version](https://img.shields.io/badge/version-1.0.0--LTS-blue.svg)](https://github.com/Neo-Editor/Neo-Editor/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com/Neo-Editor/Neo-Editor/releases)
+[![Author](https://img.shields.io/badge/author-Surya%20Sekhar%20Roy-orange.svg)](https://github.com/Neo-Editor)
+[![Organization](https://img.shields.io/badge/organization-SunTech%20Lab-purple.svg)](https://github.com/Neo-Editor)
 
 *The Future of SQL Editing - AI-Powered, Zero Configuration, Free Forever*
 
 [Download](https://github.com/Neo-Editor/Neo-Editor/releases) • [Documentation](#features) • [Getting Started](#quick-start)
+
+**Created by Surya Sekhar Roy | SunTech Lab**
 
 </div>
 
@@ -29,6 +33,7 @@ Neo Editor is a **professional SQL client** that rivals paid tools like TablePlu
 🎨 **Beautiful UI** - Dark/Light themes, modern design  
 🔐 **Enterprise Security** - Encrypted storage, offline operation  
 💰 **100% Free** - No subscriptions, no hidden costs  
+🖥️ **Fully Offline** - Desktop app works without internet connection
 
 ---
 
@@ -44,6 +49,7 @@ Neo Editor is a **professional SQL client** that rivals paid tools like TablePlu
 - **Query History** - Auto-save all queries with timestamps
 - **SQL Snippets** - 10+ pre-built query templates
 - **Statistics Dashboard** - Query analytics with visualizations
+- **Offline Operation** - Full desktop IDE, no internet required
 
 ### Advanced Features
 
@@ -56,6 +62,19 @@ Neo Editor is a **professional SQL client** that rivals paid tools like TablePlu
 
 ---
 
+## 🖥️ Desktop App - Fully Offline
+
+**Neo Editor is a complete desktop IDE that works 100% offline:**
+
+✅ **No Internet Required** - All features work without connection  
+✅ **Local AI** - Debugging AI runs on your machine  
+✅ **Embedded Databases** - 3 databases pre-installed  
+✅ **Standalone Application** - No web browser needed  
+✅ **Native Performance** - Direct hardware access  
+✅ **Privacy First** - All data stays on your device  
+
+---
+
 ## 📥 Installation
 
 ### Download Releases
@@ -64,16 +83,19 @@ Neo Editor is a **professional SQL client** that rivals paid tools like TablePlu
 - Download `Neo-Editor-Setup-1.0.0.exe`
 - Run installer and follow wizard
 - Launch from Start Menu
+- **Works completely offline**
 
 **Linux (Ubuntu, Debian, etc.)**:
 - Download `Neo-Editor-1.0.0.AppImage`
 - `chmod +x Neo-Editor-1.0.0.AppImage`
 - Run `./Neo-Editor-1.0.0.AppImage`
+- **No internet connection needed**
 
 **macOS**:
 - Download `Neo-Editor-1.0.0.dmg`
 - Open DMG and drag to Applications
 - Launch from Applications folder
+- **Fully offline desktop app**
 
 ### System Requirements
 
@@ -81,18 +103,19 @@ Neo Editor is a **professional SQL client** that rivals paid tools like TablePlu
 - **RAM**: 4 GB minimum, 8 GB recommended
 - **Disk**: 500 MB free space
 - **CPU**: Dual-core 2.0 GHz or better
+- **Internet**: Only for initial download (app runs offline)
 
 ---
 
 ## 🎯 Quick Start
 
-1. **Launch Neo Editor**
-2. **Select Database** - SQLite (default), MySQL, or PostgreSQL
-3. **Run Sample Query**:
+1. **Download & Install** Neo Editor for your platform
+2. **Launch** - No internet required after installation
+3. **Select Database** - SQLite (default), MySQL, or PostgreSQL
+4. **Run Sample Query**:
    ```sql
-   SELECT * FROM users LIMIT 5;
-   ```
-4. **Explore Features**:
+   SELECT * FROM users LIMIT 5;   ```
+5. **Explore Features**:
    - Click **Export** to save results
    - Press **Ctrl+K** to format SQL
    - Open **Schema** to browse tables
@@ -131,6 +154,7 @@ Neo Editor is a **professional SQL client** that rivals paid tools like TablePlu
 | Feature | Neo Editor | TablePlus | DBeaver | DataGrip |
 |---------|-----------|-----------|---------|----------|
 | **Price** | **FREE** | $79 | Free | $89/year |
+| **Offline Desktop** | ✅ | ✅ | ✅ | ✅ |
 | Export CSV/JSON/Excel | ✅ | ✅ | ✅ | ✅ |
 | AI Debugging | ✅ | ❌ | ❌ | Paid only |
 | Zero Setup | ✅ | ❌ | ❌ | ❌ |
@@ -145,6 +169,7 @@ Neo Editor is a **professional SQL client** that rivals paid tools like TablePlu
 - ✅ Instant setup (3 pre-configured databases)
 - ✅ 100% free forever
 - ✅ Open source
+- ✅ Fully offline desktop app
 
 ---
 
@@ -155,12 +180,14 @@ Neo Editor is a **professional SQL client** that rivals paid tools like TablePlu
 - Query optimization
 - API data preparation
 - Schema design
+- **Offline development**
 
 ### For Data Analysts
 - Ad-hoc data analysis
 - Report generation
 - Data export for Excel/BI tools
 - Quick data inspection
+- **Work without internet**
 
 ### For Data Engineers
 - ETL pipeline testing
@@ -173,6 +200,7 @@ Neo Editor is a **professional SQL client** that rivals paid tools like TablePlu
 - Practice complex queries
 - Understand database schemas
 - Free professional tool
+- **No internet required for practice**
 
 ---
 
@@ -183,6 +211,18 @@ Neo Editor is a **professional SQL client** that rivals paid tools like TablePlu
 - ✅ **Offline AI** - Debugging works without internet
 - ✅ **Encrypted Storage** - Password-protected queries
 - ✅ **Open Source** - Fully auditable code
+- ✅ **No External Connections** - Complete privacy
+
+---
+
+## 👨‍💻 Creator
+
+**Surya Sekhar Roy**  
+**Organization**: SunTech Lab
+
+Connections:
+- GitHub: [@Neo-Editor](https://github.com/Neo-Editor)
+- Project: [Neo Editor](https://github.com/Neo-Editor/Neo-Editor)
 
 ---
 
@@ -249,7 +289,8 @@ If you find Neo Editor useful, please consider starring the repository!
 
 - **Issues**: [GitHub Issues](https://github.com/Neo-Editor/Neo-Editor/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/Neo-Editor/Neo-Editor/discussions)
-- **Email**: support@neoeditor.dev
+- **Creator**: Surya Sekhar Roy
+- **Organization**: SunTech Lab
 
 ---
 
@@ -266,11 +307,11 @@ Built with:
 
 <div align="center">
 
-**Neo Editor v1.0.0**
+**Neo Editor v1.0.0 LTS (Long Term Support)**
 
 *The Future of SQL Editing*
 
-Made with ❤️ by the Neo Editor Team
+**Created by Surya Sekhar Roy | SunTech Lab**
 
 [⬇️ Download Now](https://github.com/Neo-Editor/Neo-Editor/releases) | [⭐ Star on GitHub](https://github.com/Neo-Editor/Neo-Editor)
 
