@@ -34,7 +34,7 @@ function AppContent() {
   const [activeSection, setActiveSection] = useState('editor');
   const [selectedDatabase, setSelectedDatabase] = useState('sqlite');
   const [dbConfig, setDbConfig] = useState({ database: 'embedded' }); // Use embedded databases
-  const [query, setQuery] = useState(`-- Welcome to SQL Studio! 🚀
+  const [query, setQuery] = useState(`-- Welcome to Neo Editor!
 -- ALL databases ready to use - ZERO setup needed!
 
 -- Try switching databases in the toolbar dropdown

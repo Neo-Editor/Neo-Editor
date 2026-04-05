@@ -16,7 +16,7 @@ const Sidebar = ({ activeSection, onSectionChange, collapsed }) => {
   return (
     <div className="w-16 md:w-64 flex-shrink-0 border-r border-border bg-surface flex flex-col">
       <div className="h-14 border-b border-border flex items-center px-4">
-        <h1 className="text-lg font-bold tracking-tight hidden md:block">SQL Studio</h1>
+        <h1 className="text-lg font-bold tracking-tight hidden md:block">Neo Editor</h1>
         <div className="w-8 h-8 bg-accent-primary rounded-sm flex items-center justify-center md:hidden">
           <Database size={20} weight="bold" className="text-white" />
         </div>

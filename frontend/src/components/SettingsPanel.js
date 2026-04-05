@@ -72,7 +72,7 @@ const SettingsPanel = () => {
       <div className="p-4 border-b border-border">
         <h2 className="font-bold text-lg mb-2">Settings</h2>
         <p className="text-xs text-secondary">
-          Customize your SQL Studio experience
+          Customize your Neo Editor experience
         </p>
       </div>
       <ScrollArea className="flex-1">
@@ -96,7 +96,7 @@ const SettingsPanel = () => {
           ))}
 
           <div className="mt-6 p-4 border border-border bg-surface">
-            <h3 className="font-medium mb-2 text-sm">About SQL Studio</h3>
+            <h3 className="font-medium mb-2 text-sm">About Neo Editor</h3>
             <p className="text-xs text-secondary mb-2">
               A powerful desktop SQL client with multi-database support, AI debugging, and encrypted file storage.
             </p>
