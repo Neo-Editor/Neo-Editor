@@ -815,7 +815,9 @@ async def get_schema(request: SchemaRequest):
         schema = {"tables": []}
         
         if db_type == "sqlite":
-            db_path = request.connection_params.get('database', '/tmp/sql_studio_default.db') if request.connection_params else '/tmp/sql_studio_default.db'
+            db_path = DB_PATHS['sqlite']
+            if request.connection_params and request.connection_params.get('database') and request.connection_params['database'] != 'embedded':
+                db_path = request.connection_params['database']
             conn = sqlite3.connect(db_path)
             cursor = conn.cursor()
             
@@ -847,88 +849,46 @@ async def get_schema(request: SchemaRequest):
             return schema
         
         elif db_type == "mysql":
-            if not request.connection_params:
-                raise ValueError("MySQL connection parameters required")
-            
-            conn = pymysql.connect(
-                host=request.connection_params.get('host', 'localhost'),
-                port=request.connection_params.get('port', 3306),
-                user=request.connection_params.get('user', 'root'),
-                password=request.connection_params.get('password', ''),
-                database=request.connection_params.get('database', ''),
-                charset='utf8mb4'
-            )
+            # Use embedded MySQL demo database (SQLite-based)
+            db_path = DB_PATHS['mysql']
+            conn = sqlite3.connect(db_path)
             cursor = conn.cursor()
-            
-            # Get all tables
-            cursor.execute("SHOW TABLES")
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
             tables = cursor.fetchall()
-            
             for table in tables:
                 table_name = table[0]
-                cursor.execute(f"DESCRIBE {table_name}")
+                cursor.execute(f"PRAGMA table_info({table_name})")
                 columns = cursor.fetchall()
-                
                 table_info = {
                     "name": table_name,
                     "columns": [
-                        {
-                            "name": col[0],
-                            "type": col[1],
-                            "nullable": col[2] == 'YES',
-                            "primary_key": col[3] == 'PRI'
-                        }
+                        {"name": col[1], "type": col[2], "nullable": not col[3], "primary_key": bool(col[5])}
                         for col in columns
                     ]
                 }
                 schema["tables"].append(table_info)
-            
             conn.close()
             return schema
         
         elif db_type == "postgresql":
-            if not request.connection_params:
-                raise ValueError("PostgreSQL connection parameters required")
-            
-            conn = psycopg2.connect(
-                host=request.connection_params.get('host', 'localhost'),
-                port=request.connection_params.get('port', 5432),
-                user=request.connection_params.get('user', 'postgres'),
-                password=request.connection_params.get('password', ''),
-                database=request.connection_params.get('database', 'postgres')
-            )
+            # Use embedded PostgreSQL demo database (SQLite-based)
+            db_path = DB_PATHS['postgresql']
+            conn = sqlite3.connect(db_path)
             cursor = conn.cursor()
-            
-            cursor.execute("""
-                SELECT table_name 
-                FROM information_schema.tables 
-                WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
-            """)
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
             tables = cursor.fetchall()
-            
             for table in tables:
                 table_name = table[0]
-                cursor.execute(f"""
-                    SELECT column_name, data_type, is_nullable
-                    FROM information_schema.columns 
-                    WHERE table_name = '{table_name}'
-                """)
+                cursor.execute(f"PRAGMA table_info({table_name})")
                 columns = cursor.fetchall()
-                
                 table_info = {
                     "name": table_name,
                     "columns": [
-                        {
-                            "name": col[0],
-                            "type": col[1],
-                            "nullable": col[2] == 'YES',
-                            "primary_key": False
-                        }
+                        {"name": col[1], "type": col[2], "nullable": not col[3], "primary_key": bool(col[5])}
                         for col in columns
                     ]
                 }
                 schema["tables"].append(table_info)
-            
             conn.close()
             return schema
         
