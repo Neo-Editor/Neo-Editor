@@ -12,12 +12,13 @@ const DatabasePanel = ({ selectedDatabase, onDatabaseChange, onConfigChange }) =
   const [showConfigDialog, setShowConfigDialog] = useState(false);
   const [tempConfig, setTempConfig] = useState({});
   const [sampleDbCreated, setSampleDbCreated] = useState(false);
+  const [showSetupGuide, setShowSetupGuide] = useState(false);
 
   const databases = [
-    { value: 'sqlite', label: 'SQLite', description: 'File-based database, perfect for testing' },
-    { value: 'mysql', label: 'MySQL', description: 'Popular open-source relational database' },
-    { value: 'postgresql', label: 'PostgreSQL', description: 'Advanced open-source database' },
-    { value: 'sqlserver', label: 'SQL Server', description: 'Microsoft SQL Server' }
+    { value: 'sqlite', label: 'SQLite', description: 'File-based database, perfect for testing', setup: 'none' },
+    { value: 'mysql', label: 'MySQL', description: 'Popular open-source relational database', setup: 'required' },
+    { value: 'postgresql', label: 'PostgreSQL', description: 'Advanced open-source database', setup: 'required' },
+    { value: 'sqlserver', label: 'SQL Server', description: 'Microsoft SQL Server', setup: 'required' }
   ];
 
   const createSampleDatabase = async () => {
@@ -76,6 +77,9 @@ const DatabasePanel = ({ selectedDatabase, onDatabaseChange, onConfigChange }) =
                 )}
               </div>
               <p className="text-xs text-secondary">{db.description}</p>
+              {db.setup === 'required' && (
+                <p className="text-xs text-accent-ai-debug mt-1">⚠️ Requires server installation</p>
+              )}
             </button>
           ))}
 
@@ -92,6 +96,43 @@ const DatabasePanel = ({ selectedDatabase, onDatabaseChange, onConfigChange }) =
               >
                 {sampleDbCreated ? 'Recreate Sample Database' : 'Create Sample Database'}
               </button>
+            </div>
+          )}
+          
+          {(selectedDatabase === 'mysql' || selectedDatabase === 'postgresql') && (
+            <div className="mt-6 p-4 border border-accent-ai-debug bg-surface">
+              <h3 className="font-medium mb-2 text-sm text-accent-ai-debug">⚠️ Setup Required</h3>
+              <p className="text-xs text-secondary mb-3">
+                {selectedDatabase === 'mysql' 
+                  ? 'MySQL server must be installed and running on your system.'
+                  : 'PostgreSQL server must be installed and running on your system.'}
+              </p>
+              <div className="text-xs space-y-2 mb-3">
+                <p className="font-medium">Quick Setup:</p>
+                {selectedDatabase === 'mysql' ? (
+                  <>
+                    <p>• Download: <a href="https://dev.mysql.com/downloads/" target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline">mysql.com/downloads</a></p>
+                    <p>• Install MySQL Server</p>
+                    <p>• Start MySQL service</p>
+                    <p>• Create database: <code className="bg-background px-1">CREATE DATABASE mydb;</code></p>
+                  </>
+                ) : (
+                  <>
+                    <p>• Download: <a href="https://www.postgresql.org/download/" target="_blank" rel="noopener noreferrer" className="text-accent-primary hover:underline">postgresql.org/download</a></p>
+                    <p>• Install PostgreSQL</p>
+                    <p>• Start PostgreSQL service</p>
+                    <p>• Create database: <code className="bg-background px-1">CREATE DATABASE mydb;</code></p>
+                  </>
+                )}
+              </div>
+              <div className="p-3 bg-background border border-border text-xs">
+                <p className="font-medium mb-1">💡 Quick Tip:</p>
+                <p className="text-secondary">
+                  Don't have {selectedDatabase === 'mysql' ? 'MySQL' : 'PostgreSQL'} installed? 
+                  Use <span className="font-medium text-primary">SQLite</span> instead - 
+                  it's already set up and ready to use with sample data!
+                </p>
+              </div>
             </div>
           )}
         </div>

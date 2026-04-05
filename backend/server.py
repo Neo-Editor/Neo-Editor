@@ -171,7 +171,26 @@ def execute_mysql(query: str, params: Optional[Dict] = None) -> QueryResult:
     
     try:
         if not params:
-            raise ValueError("MySQL connection parameters required")
+            return QueryResult(
+                success=False, 
+                error="MySQL requires connection configuration. Click 'Database' in sidebar to configure MySQL connection with host, port, username, password, and database name.",
+                execution_time=time.time() - start
+            )
+        
+        # Validate required parameters
+        if not params.get('host'):
+            return QueryResult(
+                success=False,
+                error="MySQL host is required. Please configure in Database settings.",
+                execution_time=time.time() - start
+            )
+        
+        if not params.get('user'):
+            return QueryResult(
+                success=False,
+                error="MySQL username is required. Please configure in Database settings.",
+                execution_time=time.time() - start
+            )
         
         conn = pymysql.connect(
             host=params.get('host', 'localhost'),
@@ -179,7 +198,8 @@ def execute_mysql(query: str, params: Optional[Dict] = None) -> QueryResult:
             user=params.get('user', 'root'),
             password=params.get('password', ''),
             database=params.get('database', ''),
-            charset='utf8mb4'
+            charset='utf8mb4',
+            connect_timeout=5  # 5 second timeout
         )
         cursor = conn.cursor()
         
@@ -204,8 +224,34 @@ def execute_mysql(query: str, params: Optional[Dict] = None) -> QueryResult:
         
         conn.close()
         return result
+    except pymysql.err.OperationalError as e:
+        error_code = e.args[0] if e.args else 0
+        if error_code == 2003:
+            return QueryResult(
+                success=False, 
+                error=f"Cannot connect to MySQL server. Please ensure:\n1. MySQL server is running on {params.get('host', 'localhost')}:{params.get('port', 3306)}\n2. Host and port are correct\n3. Firewall allows connection\n4. Or switch to SQLite (no setup needed)",
+                execution_time=time.time() - start
+            )
+        elif error_code == 1045:
+            return QueryResult(
+                success=False,
+                error="Access denied: Invalid MySQL username or password. Check your credentials in Database settings.",
+                execution_time=time.time() - start
+            )
+        elif error_code == 1049:
+            return QueryResult(
+                success=False,
+                error=f"Database '{params.get('database')}' does not exist. Create it first or check the database name.",
+                execution_time=time.time() - start
+            )
+        else:
+            return QueryResult(
+                success=False,
+                error=f"MySQL Error {error_code}: {str(e)}\n\nTip: Use SQLite for zero-setup database (already configured).",
+                execution_time=time.time() - start
+            )
     except Exception as e:
-        return QueryResult(success=False, error=str(e), execution_time=time.time() - start)
+        return QueryResult(success=False, error=f"MySQL Error: {str(e)}\n\nTip: Use SQLite for zero-setup database.", execution_time=time.time() - start)
 
 def execute_postgresql(query: str, params: Optional[Dict] = None) -> QueryResult:
     """Execute PostgreSQL query"""
@@ -214,14 +260,19 @@ def execute_postgresql(query: str, params: Optional[Dict] = None) -> QueryResult
     
     try:
         if not params:
-            raise ValueError("PostgreSQL connection parameters required")
+            return QueryResult(
+                success=False,
+                error="PostgreSQL requires connection configuration. Click 'Database' in sidebar to configure PostgreSQL connection.",
+                execution_time=time.time() - start
+            )
         
         conn = psycopg2.connect(
             host=params.get('host', 'localhost'),
             port=params.get('port', 5432),
             user=params.get('user', 'postgres'),
             password=params.get('password', ''),
-            database=params.get('database', 'postgres')
+            database=params.get('database', 'postgres'),
+            connect_timeout=5
         )
         cursor = conn.cursor()
         

@@ -12,9 +12,16 @@ const ResultsTable = ({ result, dataTestId }) => {
 
   if (!result.success) {
     return (
-      <div className="p-4 text-error" data-testid={`${dataTestId}-error`}>
-        <h3 className="font-bold text-lg mb-2">Error</h3>
-        <p className="font-mono text-sm">{result.error}</p>
+      <div className="p-4" data-testid={`${dataTestId}-error`}>
+        <h3 className="font-bold text-lg mb-3 text-error">Error</h3>
+        <div className="p-4 bg-surface border border-error">
+          <pre className="text-sm font-mono whitespace-pre-wrap break-words text-error">
+            {result.error}
+          </pre>
+        </div>
+        {result.execution_time && (
+          <p className="text-xs text-secondary mt-2">Execution time: {result.execution_time?.toFixed(3)}s</p>
+        )}
       </div>
     );
   }
