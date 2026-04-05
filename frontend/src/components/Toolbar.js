@@ -13,7 +13,7 @@ const Toolbar = ({ onRun, onRefresh, selectedDatabase, onDatabaseChange, databas
           <SelectTrigger className="w-40" data-testid="database-selector">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="z-50">
             {databases.map(db => (
               <SelectItem key={db.value} value={db.value}>
                 {db.label}
