@@ -180,6 +180,77 @@ class SQLStudioAPITester:
         }
         return self.run_test("Unsupported Database", "POST", "query/execute", 400, query_data)
 
+    def test_export_csv(self):
+        """Test CSV export functionality"""
+        export_data = {
+            "format": "csv",
+            "data": {
+                "columns": ["id", "name", "email"],
+                "rows": [[1, "John Doe", "john@example.com"], [2, "Jane Smith", "jane@example.com"]]
+            },
+            "filename": "test_export"
+        }
+        return self.run_test("Export CSV", "POST", "export", 200, export_data)
+
+    def test_export_json(self):
+        """Test JSON export functionality"""
+        export_data = {
+            "format": "json",
+            "data": {
+                "columns": ["id", "name", "email"],
+                "rows": [[1, "John Doe", "john@example.com"], [2, "Jane Smith", "jane@example.com"]]
+            },
+            "filename": "test_export"
+        }
+        return self.run_test("Export JSON", "POST", "export", 200, export_data)
+
+    def test_export_excel(self):
+        """Test Excel export functionality"""
+        export_data = {
+            "format": "excel",
+            "data": {
+                "columns": ["id", "name", "email"],
+                "rows": [[1, "John Doe", "john@example.com"], [2, "Jane Smith", "jane@example.com"]]
+            },
+            "filename": "test_export"
+        }
+        return self.run_test("Export Excel", "POST", "export", 200, export_data)
+
+    def test_export_sql(self):
+        """Test SQL export functionality"""
+        export_data = {
+            "format": "sql",
+            "data": {
+                "columns": ["id", "name", "email"],
+                "rows": [[1, "John Doe", "john@example.com"], [2, "Jane Smith", "jane@example.com"]]
+            },
+            "filename": "test_export"
+        }
+        return self.run_test("Export SQL", "POST", "export", 200, export_data)
+
+    def test_format_query(self):
+        """Test SQL query formatting"""
+        format_data = {
+            "query": "select * from users where age > 25 and department = 'engineering'"
+        }
+        return self.run_test("Format Query", "POST", "format-query", 200, format_data)
+
+    def test_schema_sqlite(self):
+        """Test schema exploration for SQLite"""
+        schema_data = {
+            "database_type": "sqlite",
+            "connection_params": {"database": "/tmp/sql_studio_default.db"}
+        }
+        return self.run_test("Schema SQLite", "POST", "schema", 200, schema_data)
+
+    def test_snippets(self):
+        """Test SQL snippets retrieval"""
+        return self.run_test("SQL Snippets", "GET", "snippets", 200)
+
+    def test_stats(self):
+        """Test query statistics"""
+        return self.run_test("Query Statistics", "GET", "stats", 200)
+
 def main():
     print("🚀 Starting SQL Studio API Tests...")
     print("=" * 50)
@@ -201,6 +272,14 @@ def main():
         tester.test_settings_get,
         tester.test_settings_update,
         tester.test_sample_database_creation,
+        tester.test_export_csv,
+        tester.test_export_json,
+        tester.test_export_excel,
+        tester.test_export_sql,
+        tester.test_format_query,
+        tester.test_schema_sqlite,
+        tester.test_snippets,
+        tester.test_stats,
         tester.test_unsupported_database,
         tester.test_clear_history  # Clear history last
     ]

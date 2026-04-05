@@ -24,6 +24,12 @@ import hashlib
 import json
 from transformers import pipeline
 import torch
+import csv
+import io
+import sqlparse
+from openpyxl import Workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
+import pandas as pd
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -577,6 +583,359 @@ async def create_sample_database():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# Professional Features APIs
+
+class ExportRequest(BaseModel):
+    format: str  # csv, json, excel, sql
+    data: Dict[str, Any]
+    filename: Optional[str] = "export"
+
+class SchemaRequest(BaseModel):
+    database_type: str
+    connection_params: Optional[Dict[str, Any]] = None
+
+class FormatQueryRequest(BaseModel):
+    query: str
+
+class ImportDataRequest(BaseModel):
+    database_type: str
+    table_name: str
+    data: List[Dict[str, Any]]
+    connection_params: Optional[Dict[str, Any]] = None
+
+@api_router.post("/export")
+async def export_data(request: ExportRequest):
+    """Export query results in various formats"""
+    try:
+        data = request.data
+        columns = data.get('columns', [])
+        rows = data.get('rows', [])
+        
+        if request.format == 'csv':
+            output = io.StringIO()
+            writer = csv.writer(output)
+            writer.writerow(columns)
+            writer.writerows(rows)
+            return {"content": output.getvalue(), "filename": f"{request.filename}.csv"}
+        
+        elif request.format == 'json':
+            result = []
+            for row in rows:
+                result.append(dict(zip(columns, row)))
+            return {"content": json.dumps(result, indent=2), "filename": f"{request.filename}.json"}
+        
+        elif request.format == 'excel':
+            wb = Workbook()
+            ws = wb.active
+            ws.append(columns)
+            for row in rows:
+                ws.append(row)
+            
+            excel_output = io.BytesIO()
+            wb.save(excel_output)
+            excel_output.seek(0)
+            import base64
+            content = base64.b64encode(excel_output.getvalue()).decode()
+            return {"content": content, "filename": f"{request.filename}.xlsx", "encoding": "base64"}
+        
+        elif request.format == 'sql':
+            output = []
+            table_name = request.filename or "exported_table"
+            for row in rows:
+                values = []
+                for val in row:
+                    if val is None:
+                        values.append("NULL")
+                    elif isinstance(val, str):
+                        escaped_val = val.replace("'", "''")
+                        values.append(f"'{escaped_val}'")
+                    else:
+                        values.append(str(val))
+                output.append(f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({', '.join(values)});")
+            
+            return {"content": "\n".join(output), "filename": f"{request.filename}.sql"}
+        
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported export format")
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/format-query")
+async def format_query(request: FormatQueryRequest):
+    """Format SQL query for better readability"""
+    try:
+        formatted = sqlparse.format(
+            request.query,
+            reindent=True,
+            keyword_case='upper',
+            identifier_case='lower',
+            strip_comments=False,
+            use_space_around_operators=True
+        )
+        return {"formatted_query": formatted}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/schema")
+async def get_schema(request: SchemaRequest):
+    """Get database schema information"""
+    try:
+        db_type = request.database_type.lower()
+        schema = {"tables": []}
+        
+        if db_type == "sqlite":
+            db_path = request.connection_params.get('database', '/tmp/sql_studio_default.db') if request.connection_params else '/tmp/sql_studio_default.db'
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            
+            # Get all tables
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+            tables = cursor.fetchall()
+            
+            for table in tables:
+                table_name = table[0]
+                # Get columns for each table
+                cursor.execute(f"PRAGMA table_info({table_name})")
+                columns = cursor.fetchall()
+                
+                table_info = {
+                    "name": table_name,
+                    "columns": [
+                        {
+                            "name": col[1],
+                            "type": col[2],
+                            "nullable": not col[3],
+                            "primary_key": bool(col[5])
+                        }
+                        for col in columns
+                    ]
+                }
+                schema["tables"].append(table_info)
+            
+            conn.close()
+            return schema
+        
+        elif db_type == "mysql":
+            if not request.connection_params:
+                raise ValueError("MySQL connection parameters required")
+            
+            conn = pymysql.connect(
+                host=request.connection_params.get('host', 'localhost'),
+                port=request.connection_params.get('port', 3306),
+                user=request.connection_params.get('user', 'root'),
+                password=request.connection_params.get('password', ''),
+                database=request.connection_params.get('database', ''),
+                charset='utf8mb4'
+            )
+            cursor = conn.cursor()
+            
+            # Get all tables
+            cursor.execute("SHOW TABLES")
+            tables = cursor.fetchall()
+            
+            for table in tables:
+                table_name = table[0]
+                cursor.execute(f"DESCRIBE {table_name}")
+                columns = cursor.fetchall()
+                
+                table_info = {
+                    "name": table_name,
+                    "columns": [
+                        {
+                            "name": col[0],
+                            "type": col[1],
+                            "nullable": col[2] == 'YES',
+                            "primary_key": col[3] == 'PRI'
+                        }
+                        for col in columns
+                    ]
+                }
+                schema["tables"].append(table_info)
+            
+            conn.close()
+            return schema
+        
+        elif db_type == "postgresql":
+            if not request.connection_params:
+                raise ValueError("PostgreSQL connection parameters required")
+            
+            conn = psycopg2.connect(
+                host=request.connection_params.get('host', 'localhost'),
+                port=request.connection_params.get('port', 5432),
+                user=request.connection_params.get('user', 'postgres'),
+                password=request.connection_params.get('password', ''),
+                database=request.connection_params.get('database', 'postgres')
+            )
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT table_name 
+                FROM information_schema.tables 
+                WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+            """)
+            tables = cursor.fetchall()
+            
+            for table in tables:
+                table_name = table[0]
+                cursor.execute(f"""
+                    SELECT column_name, data_type, is_nullable
+                    FROM information_schema.columns 
+                    WHERE table_name = '{table_name}'
+                """)
+                columns = cursor.fetchall()
+                
+                table_info = {
+                    "name": table_name,
+                    "columns": [
+                        {
+                            "name": col[0],
+                            "type": col[1],
+                            "nullable": col[2] == 'YES',
+                            "primary_key": False
+                        }
+                        for col in columns
+                    ]
+                }
+                schema["tables"].append(table_info)
+            
+            conn.close()
+            return schema
+        
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported database type for schema exploration")
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/import-data")
+async def import_data(request: ImportDataRequest):
+    """Import data into a table"""
+    try:
+        db_type = request.database_type.lower()
+        
+        if db_type == "sqlite":
+            db_path = request.connection_params.get('database', '/tmp/sql_studio_default.db') if request.connection_params else '/tmp/sql_studio_default.db'
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            
+            if request.data:
+                columns = list(request.data[0].keys())
+                placeholders = ','.join(['?' for _ in columns])
+                
+                for row in request.data:
+                    values = [row.get(col) for col in columns]
+                    cursor.execute(
+                        f"INSERT INTO {request.table_name} ({','.join(columns)}) VALUES ({placeholders})",
+                        values
+                    )
+                
+                conn.commit()
+            
+            conn.close()
+            return {"success": True, "rows_imported": len(request.data)}
+        
+        else:
+            raise HTTPException(status_code=400, detail="Import currently only supported for SQLite")
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/snippets")
+async def get_sql_snippets():
+    """Get common SQL query snippets"""
+    snippets = [
+        {
+            "name": "Select All",
+            "description": "Select all records from a table",
+            "query": "SELECT * FROM table_name;"
+        },
+        {
+            "name": "Select with WHERE",
+            "description": "Select with condition",
+            "query": "SELECT column1, column2\\nFROM table_name\\nWHERE condition;"
+        },
+        {
+            "name": "Inner Join",
+            "description": "Join two tables",
+            "query": "SELECT t1.*, t2.*\\nFROM table1 t1\\nINNER JOIN table2 t2 ON t1.id = t2.foreign_id;"
+        },
+        {
+            "name": "Group By with Aggregation",
+            "description": "Group and aggregate data",
+            "query": "SELECT column, COUNT(*), SUM(amount)\\nFROM table_name\\nGROUP BY column\\nHAVING COUNT(*) > 1;"
+        },
+        {
+            "name": "Create Table",
+            "description": "Create a new table",
+            "query": "CREATE TABLE table_name (\\n    id INTEGER PRIMARY KEY,\\n    name TEXT NOT NULL,\\n    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\\n);"
+        },
+        {
+            "name": "Insert Data",
+            "description": "Insert new records",
+            "query": "INSERT INTO table_name (column1, column2)\\nVALUES ('value1', 'value2');"
+        },
+        {
+            "name": "Update Records",
+            "description": "Update existing records",
+            "query": "UPDATE table_name\\nSET column1 = 'new_value'\\nWHERE condition;"
+        },
+        {
+            "name": "Delete Records",
+            "description": "Delete records",
+            "query": "DELETE FROM table_name\\nWHERE condition;"
+        },
+        {
+            "name": "Subquery",
+            "description": "Query with subquery",
+            "query": "SELECT *\\nFROM table_name\\nWHERE column IN (\\n    SELECT column FROM other_table WHERE condition\\n);"
+        },
+        {
+            "name": "Transaction",
+            "description": "Transaction block",
+            "query": "BEGIN TRANSACTION;\\n-- Your SQL statements here\\nCOMMIT;\\n-- Or use ROLLBACK; to undo"
+        }
+    ]
+    return {"snippets": snippets}
+
+@api_router.get("/stats")
+async def get_query_stats():
+    """Get query execution statistics"""
+    try:
+        # Get total queries executed
+        total = await db.query_history.count_documents({})
+        
+        # Get success rate
+        successful = await db.query_history.count_documents({"success": True})
+        failed = await db.query_history.count_documents({"success": False})
+        
+        # Get database distribution
+        pipeline = [
+            {"$group": {"_id": "$database_type", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}}
+        ]
+        db_distribution = await db.query_history.aggregate(pipeline).to_list(100)
+        
+        # Get recent activity (last 7 days)
+        from datetime import datetime, timedelta, timezone
+        seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
+        recent_count = await db.query_history.count_documents({
+            "timestamp": {"$gte": seven_days_ago.isoformat()}
+        })
+        
+        return {
+            "total_queries": total,
+            "successful_queries": successful,
+            "failed_queries": failed,
+            "success_rate": round((successful / total * 100) if total > 0 else 0, 2),
+            "database_distribution": [
+                {"database": item["_id"], "count": item["count"]}
+                for item in db_distribution
+            ],
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Include the router in the main app
 app.include_router(api_router)
 
@@ -695,3 +1054,4 @@ async def startup_db():
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
+

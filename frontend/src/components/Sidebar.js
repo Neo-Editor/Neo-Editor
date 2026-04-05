@@ -1,12 +1,15 @@
 import React from 'react';
-import { ClockCounterClockwise, Folder, Database, Sparkle, Gear } from '@phosphor-icons/react';
+import { ClockCounterClockwise, Folder, Database, Sparkle, Gear, Code, ChartBar } from '@phosphor-icons/react';
 
 const Sidebar = ({ activeSection, onSectionChange, collapsed }) => {
   const sections = [
     { id: 'history', icon: ClockCounterClockwise, label: 'History' },
     { id: 'files', icon: Folder, label: 'Files' },
+    { id: 'schema', icon: Database, label: 'Schema' },
+    { id: 'snippets', icon: Code, label: 'Snippets' },
     { id: 'database', icon: Database, label: 'Database' },
     { id: 'debug', icon: Sparkle, label: 'Debug' },
+    { id: 'stats', icon: ChartBar, label: 'Stats' },
     { id: 'settings', icon: Gear, label: 'Settings' }
   ];
 
