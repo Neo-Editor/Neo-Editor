@@ -143,7 +143,9 @@ def execute_sqlite(query: str, params: Optional[Dict] = None) -> QueryResult:
     
     try:
         # Use embedded SQLite database
-        db_path = params.get('database', DB_PATHS['sqlite']) if params else DB_PATHS['sqlite']
+        db_path = DB_PATHS['sqlite']
+        if params and params.get('database') and params['database'] != 'embedded':
+            db_path = params['database']
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         
