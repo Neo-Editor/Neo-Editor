@@ -151,8 +151,8 @@ def execute_sqlite(query: str, params: Optional[Dict] = None) -> QueryResult:
         
         cursor.execute(query)
         
-        if query.strip().upper().startswith(('SELECT', 'PRAGMA', 'EXPLAIN')):
-            columns = [desc[0] for desc in cursor.description] if cursor.description else []
+        if cursor.description:
+            columns = [desc[0] for desc in cursor.description]
             rows = cursor.fetchall()
             result = QueryResult(
                 success=True,
@@ -186,8 +186,8 @@ def execute_mysql(query: str, params: Optional[Dict] = None) -> QueryResult:
         
         cursor.execute(query)
         
-        if query.strip().upper().startswith(('SELECT', 'SHOW', 'DESCRIBE', 'EXPLAIN')):
-            columns = [desc[0] for desc in cursor.description] if cursor.description else []
+        if cursor.description:
+            columns = [desc[0] for desc in cursor.description]
             rows = cursor.fetchall()
             result = QueryResult(
                 success=True,
@@ -310,8 +310,8 @@ def execute_postgresql(query: str, params: Optional[Dict] = None) -> QueryResult
         
         cursor.execute(query)
         
-        if query.strip().upper().startswith(('SELECT', 'SHOW', 'EXPLAIN')):
-            columns = [desc[0] for desc in cursor.description] if cursor.description else []
+        if cursor.description:
+            columns = [desc[0] for desc in cursor.description]
             rows = cursor.fetchall()
             result = QueryResult(
                 success=True,
