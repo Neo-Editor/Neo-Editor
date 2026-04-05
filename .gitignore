@@ -81,3 +81,7 @@ memory/test_credentials.md
 # Mobile development
 android-sdk/frontend/node_modules/.cache/default-development/6.pack
 frontend/node_modules/.cache/default-development/6.pack
+dist/win-unpacked/SQL
+Studio.exe
+node_modules/electron/dist/electron
+frontend/node_modules/.cache/default-development/0.pack

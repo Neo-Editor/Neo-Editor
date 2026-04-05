@@ -1,0 +1,47 @@
+{
+  "name": "sql-studio-desktop",
+  "version": "1.0.0",
+  "description": "A powerful desktop SQL client with AI debugging and multi-database support",
+  "main": "electron-main.js",
+  "scripts": {
+    "electron": "electron .",
+    "electron-dev": "ELECTRON_START_URL=http://localhost:3000 electron .",
+    "electron-pack": "electron-builder --win --x64",
+    "electron-pack-all": "electron-builder --win --linux --mac"
+  },
+  "build": {
+    "appId": "com.sqlstudio.app",
+    "productName": "SQL Studio",
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Development"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icon.icns"
+    },
+    "files": [
+      "build/**/*",
+      "backend/**/*",
+      "electron-main.js",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "build"
+    }
+  },
+  "author": "SQL Studio",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  }
+}
