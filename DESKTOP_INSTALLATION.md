@@ -10,8 +10,8 @@ SQL Studio can run as a standalone desktop application on Windows 11/12 and Linu
 
 ### Method 1: Pre-built Installers (Recommended)
 
-**Windows 11/12**:
-1. Download `SQL-Studio-Setup-1.0.0.exe`
+**Windows 11/12**:lp
+1. Download `SQL-Studio-Setup-1.0.0.exe`pl
 2. Run the installer
 3. Follow the installation wizard
 4. Launch SQL Studio from Start Menu

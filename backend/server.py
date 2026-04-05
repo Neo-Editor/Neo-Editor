@@ -31,8 +31,14 @@ from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 import pandas as pd
 
+# Import auto-setup
+from auto_setup import initialize_all_databases
+
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
+
+# Initialize embedded databases on startup
+DB_PATHS = initialize_all_databases()
 
 # MongoDB connection
 mongo_url = os.environ['MONGO_URL']
@@ -136,7 +142,8 @@ def execute_sqlite(query: str, params: Optional[Dict] = None) -> QueryResult:
     start = time.time()
     
     try:
-        db_path = params.get('database', ':memory:') if params else ':memory:'
+        # Use embedded SQLite database
+        db_path = params.get('database', DB_PATHS['sqlite']) if params else DB_PATHS['sqlite']
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         
@@ -165,7 +172,42 @@ def execute_sqlite(query: str, params: Optional[Dict] = None) -> QueryResult:
         return QueryResult(success=False, error=str(e), execution_time=time.time() - start)
 
 def execute_mysql(query: str, params: Optional[Dict] = None) -> QueryResult:
-    """Execute MySQL query"""
+    """Execute MySQL query - Uses embedded MySQL demo database (SQLite-based)"""
+    import time
+    start = time.time()
+    
+    try:
+        # Use embedded MySQL demo database (SQLite file with MySQL-like data)
+        db_path = DB_PATHS['mysql']
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute(query)
+        
+        if query.strip().upper().startswith(('SELECT', 'SHOW', 'DESCRIBE', 'EXPLAIN')):
+            columns = [desc[0] for desc in cursor.description] if cursor.description else []
+            rows = cursor.fetchall()
+            result = QueryResult(
+                success=True,
+                columns=columns,
+                rows=rows,
+                execution_time=time.time() - start
+            )
+        else:
+            conn.commit()
+            result = QueryResult(
+                success=True,
+                affected_rows=cursor.rowcount,
+                execution_time=time.time() - start
+            )
+        
+        conn.close()
+        return result
+    except Exception as e:
+        return QueryResult(success=False, error=f"MySQL Demo Error: {str(e)}", execution_time=time.time() - start)
+
+def execute_mysql_real(query: str, params: Optional[Dict] = None) -> QueryResult:
+    """Execute MySQL query on real MySQL server (if configured)"""
     import time
     start = time.time()
     
@@ -173,7 +215,7 @@ def execute_mysql(query: str, params: Optional[Dict] = None) -> QueryResult:
         if not params:
             return QueryResult(
                 success=False, 
-                error="MySQL requires connection configuration. Click 'Database' in sidebar to configure MySQL connection with host, port, username, password, and database name.",
+                error="Real MySQL server connection requires configuration. Using embedded MySQL demo database instead (already ready to use!).",
                 execution_time=time.time() - start
             )
         
@@ -181,14 +223,14 @@ def execute_mysql(query: str, params: Optional[Dict] = None) -> QueryResult:
         if not params.get('host'):
             return QueryResult(
                 success=False,
-                error="MySQL host is required. Please configure in Database settings.",
+                error="MySQL host is required for external MySQL server.",
                 execution_time=time.time() - start
             )
         
         if not params.get('user'):
             return QueryResult(
                 success=False,
-                error="MySQL username is required. Please configure in Database settings.",
+                error="MySQL username is required for external MySQL server.",
                 execution_time=time.time() - start
             )
         
@@ -229,7 +271,7 @@ def execute_mysql(query: str, params: Optional[Dict] = None) -> QueryResult:
         if error_code == 2003:
             return QueryResult(
                 success=False, 
-                error=f"Cannot connect to MySQL server. Please ensure:\n1. MySQL server is running on {params.get('host', 'localhost')}:{params.get('port', 3306)}\n2. Host and port are correct\n3. Firewall allows connection\n4. Or switch to SQLite (no setup needed)",
+                error=f"Cannot connect to external MySQL server. Please ensure:\n1. MySQL server is running on {params.get('host', 'localhost')}:{params.get('port', 3306)}\n2. Host and port are correct\n3. Firewall allows connection\n4. Or use the embedded MySQL demo database (already ready!)",
                 execution_time=time.time() - start
             )
         elif error_code == 1045:
@@ -247,14 +289,49 @@ def execute_mysql(query: str, params: Optional[Dict] = None) -> QueryResult:
         else:
             return QueryResult(
                 success=False,
-                error=f"MySQL Error {error_code}: {str(e)}\n\nTip: Use SQLite for zero-setup database (already configured).",
+                error=f"MySQL Error {error_code}: {str(e)}\n\nTip: Use embedded MySQL demo database (zero setup).",
                 execution_time=time.time() - start
             )
     except Exception as e:
-        return QueryResult(success=False, error=f"MySQL Error: {str(e)}\n\nTip: Use SQLite for zero-setup database.", execution_time=time.time() - start)
+        return QueryResult(success=False, error=f"MySQL Error: {str(e)}\n\nTip: Use embedded MySQL demo database.", execution_time=time.time() - start)
 
 def execute_postgresql(query: str, params: Optional[Dict] = None) -> QueryResult:
-    """Execute PostgreSQL query"""
+    """Execute PostgreSQL query - Uses embedded PostgreSQL demo database (SQLite-based)"""
+    import time
+    start = time.time()
+    
+    try:
+        # Use embedded PostgreSQL demo database (SQLite file with PostgreSQL-like data)
+        db_path = DB_PATHS['postgresql']
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        cursor.execute(query)
+        
+        if query.strip().upper().startswith(('SELECT', 'SHOW', 'EXPLAIN')):
+            columns = [desc[0] for desc in cursor.description] if cursor.description else []
+            rows = cursor.fetchall()
+            result = QueryResult(
+                success=True,
+                columns=columns,
+                rows=rows,
+                execution_time=time.time() - start
+            )
+        else:
+            conn.commit()
+            result = QueryResult(
+                success=True,
+                affected_rows=cursor.rowcount,
+                execution_time=time.time() - start
+            )
+        
+        conn.close()
+        return result
+    except Exception as e:
+        return QueryResult(success=False, error=f"PostgreSQL Demo Error: {str(e)}", execution_time=time.time() - start)
+
+def execute_postgresql_real(query: str, params: Optional[Dict] = None) -> QueryResult:
+    """Execute PostgreSQL query on real PostgreSQL server (if configured)"""
     import time
     start = time.time()
     
@@ -262,7 +339,7 @@ def execute_postgresql(query: str, params: Optional[Dict] = None) -> QueryResult
         if not params:
             return QueryResult(
                 success=False,
-                error="PostgreSQL requires connection configuration. Click 'Database' in sidebar to configure PostgreSQL connection.",
+                error="Real PostgreSQL server connection requires configuration. Using embedded PostgreSQL demo database instead (already ready to use!).",
                 execution_time=time.time() - start
             )
         

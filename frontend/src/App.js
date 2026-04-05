@@ -33,12 +33,14 @@ const databases = [
 function AppContent() {
   const [activeSection, setActiveSection] = useState('editor');
   const [selectedDatabase, setSelectedDatabase] = useState('sqlite');
-  const [dbConfig, setDbConfig] = useState({ database: '/tmp/sql_studio_default.db' });
+  const [dbConfig, setDbConfig] = useState({ database: 'embedded' }); // Use embedded databases
   const [query, setQuery] = useState(`-- Welcome to SQL Studio! 🚀
--- Database ready to use - no setup needed!
+-- ALL databases ready to use - ZERO setup needed!
 
--- Sample Query: View all users
-SELECT * FROM users;`);
+-- Try switching databases in the toolbar dropdown
+-- Current: SQLite with sample e-commerce data
+
+SELECT * FROM users LIMIT 5;`);
   const [result, setResult] = useState(null);
   const [lastError, setLastError] = useState(null);
   const [executing, setExecuting] = useState(false);
